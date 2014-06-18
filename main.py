@@ -15,8 +15,10 @@ def get_requests(f):
     pat = (r''
            '(\d+.\d+.\d+.\d+)\s-\s-\s' #IP address
            '\[(.+)\]\s' #datetime
-           '"GET\s(.+)\s\w+/.+"\s\d+\s' #requested file
-           '\d+\s"(.+)"\s' #referrer
+           '"GET\s(.+)\s\w+/.+"\s' #requested file
+           '(\d+)\s' #status
+           '(\d+)' #time response
+           '\s"(.+)"\s' #referrer
            '"(.+)"' #user agent
         )
     requests = find(pat, log_line, None)
@@ -32,10 +34,31 @@ def find(pat, text, match_item):
 def get_files(requests):
     #get requested files with req
     requested_files = []
+    count=0
+    count1000=0
+    count2000=0
+    count3000=0
+    count5000=0
     for req in requests:
         #req[2] for req file match, change to
         #data you want to count totals
         requested_files.append(req[2])
+        count +=1
+        if(int(req[4])>1000):
+            count1000 +=1
+        if(int(req[4])>2000):
+            count2000 +=1
+        if(int(req[4])>3000):
+            count3000 +=1
+        if(int(req[4])>5000):
+            print req
+            count5000 +=1
+    print "Count " + str(count) + "\n"
+    print "Count 1000 " + str(count1000) + "\n"
+    print "Count 2000  " + str(count2000) + "\n"
+    print "Count 3000 " + str(count3000) + "\n"
+    print "Count 5000 " + str(count5000) + "\n"
+
     return requested_files
 
 def file_occur(files):
@@ -48,7 +71,8 @@ def file_occur(files):
 if __name__ == '__main__':
 
     #nginx access log, standard format
-    log_file = open('example.log', 'r')
+    log_file = open('../nginx/access.log', 'r')
+
 
     #return dict of files and total requests
-    print(process_log(log_file))
+    process_log(log_file)
